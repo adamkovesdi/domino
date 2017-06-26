@@ -14,19 +14,11 @@ class Domino
 	end
 
 	def double?
-		if @head == @tail
-			true
-		else
-			false
-		end
+		@head == @tail
 	end
 
 	def has?(num)
-		if (@head == num) || (@tail == num)
-			true
-		else
-			false
-		end
+		(@head == num) || (@tail == num)
 	end
 
 	def to_s
@@ -76,11 +68,7 @@ class DominoHolder
 	end
 
 	def has?(num)
-		@dominos.each do |d|
-			if d.has?(num)
-				return true
-			end
-		end
+		@dominos.each { |d| return true if d.has?(num) }
 		return false
 	end
 
