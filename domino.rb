@@ -14,11 +14,11 @@ class Domino
 	end
 
 	def double?
-		@head == @tail
+		return (@head == @tail)
 	end
 
 	def has?(num)
-		(@head == num) || (@tail == num)
+		return ((@head == num) || (@tail == num))
 	end
 
 	def to_s
@@ -41,6 +41,11 @@ class DominoHolder
 
 	def each(&block)
 		@dominos.each(&block)
+	end
+
+	def hasdomino?(domino)
+		@dominos.each { |d| return true if d == domino }
+		return false
 	end
 
 	def count
@@ -114,47 +119,11 @@ class Hand < DominoHolder
 end
 
 class Stack < DominoHolder
-	attr_accessor :firstdouble
-
-	def spinnerclosed?
-		return false if firstdouble.nil?
+	def closed?(domino)
 		return false if @dominos.empty?
-		i = @dominos.find_index(firstdouble)
-		if (i > 0)  && (i < @dominos.count-1)
-			return true
-		else
-			return false
-		end
-	end
-
-	def getvalue
-		head = @dominos.last
-		tail = @dominos.first
-		val = 0
-		if head == tail
-			# first element in stack does not count
-			return val 
-		end
-		if head.double?
-			val += head.value
-		else
-			val += head.head
-		end
-		if tail.double?
-			val += tail.value
-		else
-			val += tail.tail
-		end
-		val
-	end
-
-	def getscore
-		val = getvalue
-		if val % 5 == 0
-			val
-		else
-			0
-		end
+		return false unless hasdomino?(domino)
+		i = @dominos.find_index(domino)
+		return ((i > 0)  && (i < @dominos.count-1))
 	end
 
 	def topnumber
@@ -170,17 +139,14 @@ class Stack < DominoHolder
 	def addtail(domino)
 		if empty?
 			@dominos.unshift(domino)
-			@firstdouble = domino if domino.double?
 			return true
 		end
 		if domino.head == bottomnumber
 			@dominos.unshift(domino)
-			@firstdouble = domino if domino.double?
 			return true
 		end
 		if domino.tail == bottomnumber
 			domino.flip
-			@firstdouble = domino if domino.double?
 			@dominos.unshift(domino)
 			return true
 		end
@@ -190,37 +156,18 @@ class Stack < DominoHolder
 	def addhead(domino)
 		if empty?
 			@dominos.push(domino)
-			@firstdouble = domino if domino.double?
 			return true
 		end
 		if domino.tail == topnumber
 			@dominos.push(domino)
-			@firstdouble = domino if domino.double?
 			return true
 		end
 		if domino.head == topnumber
 			domino.flip
-			@firstdouble = domino if domino.double?
 			@dominos.push(domino)
 			return true
 		end
 		return false
-	end
-
-	def getscorehead(domino)
-		return nil unless legalhead(domino)
-		addhead(domino)
-		s = getscore
-		delete(domino)
-		s
-	end
-
-	def getscoretail(domino)
-		return nil unless legaltail(domino)
-		addtail(domino)
-		s = getscore
-		delete(domino)
-		s
 	end
 
 	def legalhead(domino)
@@ -240,7 +187,7 @@ class Stack < DominoHolder
 	end
 
 	def str
-		"Stack: #{self.to_s} (V#{getvalue}/S#{getscore}) D: #{firstdouble}"
+		"Stack: #{self.to_s}"
 	end
 end
 
@@ -259,8 +206,8 @@ class Table
 
 	def openends
 		oe = Hash.new(99)
-		oe['n']=@vertical.topnumber if @horizontal.spinnerclosed?
-		oe['s']=@vertical.bottomnumber if @horizontal.spinnerclosed?
+		oe['n']=@vertical.topnumber
+		oe['s']=@vertical.bottomnumber
 		oe['e']=@horizontal.topnumber
 		oe['w']=@horizontal.bottomnumber
 		oe
@@ -279,10 +226,15 @@ class Table
 		else
 			return
 		end
-		if @horizontal.spinnerclosed? && @vertical.empty?
-			@vertical.add(@horizontal.firstdouble)
-			@vertical.firstdouble = @horizontal.firstdouble
+		if ret && domino.double? && spinner.nil?
+			@spinner = domino
 		end
+
+		if ret && !@spinner.nil?
+			@horizontal.addtail(@spinner) if (!@horizontal.hasdomino?(@spinner)) && (@vertical.closed?(@spinner))
+			@vertical.addtail(@spinner) if (!@vertical.hasdomino?(@spinner)) && (@horizontal.closed?(@spinner))
+		end
+
 		ret
 	end
 end

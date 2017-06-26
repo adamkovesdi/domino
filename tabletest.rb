@@ -14,6 +14,8 @@ command = ''
 while command != 'q'
 	h.display
 	t.display
+	#puts t.openends
+	puts t.spinner
 	print '> '
 	command = gets.chomp
 	next if command == 'q'
