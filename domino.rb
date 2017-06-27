@@ -107,6 +107,10 @@ class Hand < DominoHolder
 		getdoubles.max
 	end
 
+	def getdominos(number)
+		@dominos.select { |d| d.has?(number) }
+	end
+
 	def get(index)
 		@dominos[index]
 	end
