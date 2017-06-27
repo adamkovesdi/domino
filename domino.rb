@@ -183,12 +183,9 @@ class Stack < DominoHolder
 	end
 
 	def display
-		puts str 
+		puts self.to_s 
 	end
 
-	def str
-		"Stack: #{self.to_s}"
-	end
 end
 
 class Table
@@ -200,29 +197,46 @@ class Table
 	end
 
 	def display
-		puts "W #{@horizontal.str} E"
-		puts "S #{@vertical.str} N"
+		puts "W #{@horizontal} E"
+		puts "S #{@vertical} N"
 	end
 
 	def openends
-		oe = Hash.new(99)
-		oe['n']=@vertical.topnumber
-		oe['s']=@vertical.bottomnumber
-		oe['e']=@horizontal.topnumber
-		oe['w']=@horizontal.bottomnumber
+		# hash of playable ends - entire hash is empty if the table is empty
+		oe = Hash.new
+		oe['n']=@vertical.topnumber unless @vertical.topnumber.nil?
+		oe['s']=@vertical.bottomnumber unless @vertical.bottomnumber.nil?
+		oe['e']=@horizontal.topnumber unless @horizontal.topnumber.nil?
+		oe['w']=@horizontal.bottomnumber unless @horizontal.bottomnumber.nil?
 		oe
 	end
 
 	def play(domino, quarter)
 		case quarter
 		when 'n'
-			ret = @vertical.addhead(domino) if @vertical.legalhead(domino)
+			if @vertical.empty?
+				ret = @vertical.addhead(domino) if @horizontal.empty?
+			else
+				ret = @vertical.addhead(domino) if @vertical.legalhead(domino)
+			end
 		when 's'
-			ret = @vertical.addtail(domino) if @vertical.legaltail(domino)
+			if @vertical.empty?
+				ret = @vertical.addtail(domino) if @horizontal.empty?
+			else
+				ret = @vertical.addtail(domino) if @vertical.legaltail(domino)
+			end
 		when 'e'
-			ret = @horizontal.addhead(domino) if @horizontal.legalhead(domino)
+			if @horizontal.empty?
+				ret = @horizontal.addhead(domino) if @vertical.empty?
+			else
+				ret = @horizontal.addhead(domino) if @horizontal.legalhead(domino)
+			end
 		when 'w'
-			ret = @horizontal.addtail(domino) if @horizontal.legaltail(domino)
+			if @horizontal.empty?
+				ret = @horizontal.addtail(domino) if @vertical.empty?
+			else
+				ret = @horizontal.addtail(domino) if @horizontal.legaltail(domino)
+			end
 		else
 			return
 		end

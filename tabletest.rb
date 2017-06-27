@@ -14,13 +14,13 @@ command = ''
 while command != 'q'
 	h.display
 	t.display
-	#puts t.openends
-	puts t.spinner
+	puts t.openends
 	print '> '
 	command = gets.chomp
 	next if command == 'q'
 	if command == 'p'
-		h.add(by.pull)
+		d = by.pull
+		h.add(d) unless d.nil?
 		next
 	end
 	domino = h.get(command[0].to_i)
