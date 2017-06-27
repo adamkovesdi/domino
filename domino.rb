@@ -96,6 +96,10 @@ class Boneyard < DominoHolder
 	def shuffle
 		@dominos.shuffle!
 	end
+	
+	def display
+		puts "Boneyard: #{self.to_s}"
+	end
 end
 
 class Hand < DominoHolder

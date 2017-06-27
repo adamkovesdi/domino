@@ -1,36 +1,33 @@
 #!/usr/bin/env ruby
-
-# Bastard random player who just selects one valid move and plays it
+#
+# Random player for domino engine by adamkov
 
 require_relative 'domino'
 
-by = Boneyard.new
-h = Hand.new
-t = Table.new
+class Randomplayer
+	attr_reader :name
 
-7.times do
-	h.add(by.pull)
-end
+	def initialize(name = 'noname')
+		@name = name
+	end
 
+	def act(table, hand)
+		oe = table.openends
 
-# d = h.highestdouble
-# if d.nil?
-# puts "No double"
-d = h.sample
-# end
+		if oe.empty?
+			# all ends free, play highest double or random domino
+			domino = hand.highestdouble
+			domino = hand.sample if domino.nil?
+			place = 'e'
+			return place, domino
+		end
 
-t.play(d,'e')
-h.delete(d)
-
-loop do
-	canplay = true
-	while canplay
-		oe = t.openends
 		validmoves = Hash.new
+		# valid moves hash <key: domino> => [ 'e', 's', 'w'... etc]
 
 		oe.each do |e,num|
-			if h.has?(num)
-				doms = h.getdominos(num)
+			if hand.has?(num)
+				doms = hand.getdominos(num)
 				doms.each do |d|
 					arr = validmoves[d]
 					if arr.nil?
@@ -42,21 +39,15 @@ loop do
 			end
 		end
 
-		rdomino = validmoves.keys.sample
-		if rdomino.nil?
-			# no valid moves, pull at end
-			canplay = false
+		domino = validmoves.keys.sample
+		if domino.nil?
+			# no valid moves, pull
+			place = 'p'
 		else
 			# play a random move
-			dest = validmoves[rdomino].sample
-			t.play(rdomino,dest)
-			h.delete(rdomino)
+			place = validmoves[domino].sample
 		end
+		return place, domino
 	end
-	break if by.count == 0
-	h.add(by.pull)
 end
 
-
-h.display
-t.display
