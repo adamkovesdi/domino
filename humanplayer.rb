@@ -17,14 +17,11 @@ class Humanplayer
 	def act(table, hand)
 		table.display
 		print "Player hand: " ; hand.display
-		puts "Enter move [domino][place] (q to quit, p to pull new domino)"
+		puts "Enter move [domino][place] (q to quit)"
 
 		loop do
 			print '> '
-			input = gets.chomp.downcase
-			if input[0] == 'p'
-				return 'p'
-			end
+			input = gets.strip.downcase
 			if input[0] == 'q'
 				puts 'Quit.'
 				exit 0

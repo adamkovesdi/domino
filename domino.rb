@@ -96,7 +96,7 @@ class Boneyard < DominoHolder
 	def shuffle
 		@dominos.shuffle!
 	end
-	
+
 	def display
 		puts "Boneyard: #{self.to_s}"
 	end
@@ -120,7 +120,6 @@ class Hand < DominoHolder
 	end
 
 	def display
-		print 'Hand: '
 		@dominos.each_with_index { |dom,i| print "#{i} [#{dom}] " }
 		puts
 	end
@@ -259,5 +258,15 @@ class Table
 
 		ret
 	end
+
+	def canplay?(hand)
+		oe = openends
+		return true if oe.empty?
+		oe.each do |dir, num|
+			return true if hand.has?(num)
+		end
+		return false
+	end
+
 end
 
