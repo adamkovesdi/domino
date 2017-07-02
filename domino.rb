@@ -133,6 +133,16 @@ class Stack < DominoHolder
 		return ((i > 0)  && (i < @dominos.count-1))
 	end
 
+	def topdomino
+		return nil if @dominos.empty?
+		@dominos.last
+	end
+
+	def bottomdomino
+		return nil if @dominos.empty?
+		@dominos.first
+	end
+
 	def topnumber
 		return nil if @dominos.empty?
 		@dominos.last.head
@@ -177,13 +187,13 @@ class Stack < DominoHolder
 		return false
 	end
 
-	def legalhead(domino)
+	def legalhead?(domino)
 		return true if empty?
 		return true if domino.has?(topnumber)
 		return false
 	end
 
-	def legaltail(domino)
+	def legaltail?(domino)
 		return true if empty?
 		return true if domino.has?(bottomnumber)
 		return false
@@ -203,9 +213,12 @@ class Table
 		@vertical = Stack.new
 	end
 
+	def to_s
+		"W #{@horizontal} E\nS #{@vertical} N"
+	end
+
 	def display
-		puts "W #{@horizontal} E"
-		puts "S #{@vertical} N"
+		puts self.to_s
 	end
 
 	def openends
@@ -218,34 +231,48 @@ class Table
 		oe
 	end
 
-	def play(domino, quarter)
+	def legalmove?(domino, quarter)
 		case quarter
 		when 'n'
 			if @vertical.empty?
-				ret = @vertical.addhead(domino) if @horizontal.empty?
+				return true if @horizontal.empty?
 			else
-				ret = @vertical.addhead(domino) if @vertical.legalhead(domino)
+				return true if @vertical.legalhead?(domino)
 			end
 		when 's'
 			if @vertical.empty?
-				ret = @vertical.addtail(domino) if @horizontal.empty?
+				return true if @horizontal.empty?
 			else
-				ret = @vertical.addtail(domino) if @vertical.legaltail(domino)
+				return true if @vertical.legaltail?(domino)
 			end
 		when 'e'
 			if @horizontal.empty?
-				ret = @horizontal.addhead(domino) if @vertical.empty?
+				return true if @vertical.empty?
 			else
-				ret = @horizontal.addhead(domino) if @horizontal.legalhead(domino)
+				return true if @horizontal.legalhead?(domino)
 			end
 		when 'w'
 			if @horizontal.empty?
-				ret = @horizontal.addtail(domino) if @vertical.empty?
+				return true if @vertical.empty?
 			else
-				ret = @horizontal.addtail(domino) if @horizontal.legaltail(domino)
+				return true if @horizontal.legaltail?(domino)
 			end
+		end
+		return false
+	end
+
+	def play(domino, quarter)
+		case quarter
+		when 'n'
+				ret = @vertical.addhead(domino) if legalmove?(domino,quarter)
+		when 's'
+				ret = @vertical.addtail(domino) if legalmove?(domino,quarter)
+		when 'e'
+				ret = @horizontal.addhead(domino) if legalmove?(domino,quarter)
+		when 'w'
+				ret = @horizontal.addtail(domino) if legalmove?(domino,quarter)
 		else
-			return
+			return false
 		end
 		if ret && domino.double? && spinner.nil?
 			@spinner = domino
@@ -266,6 +293,45 @@ class Table
 			return true if hand.has?(num)
 		end
 		return false
+	end
+
+	def getscore
+		# returns the score of the whole board
+		scores = Hash.new
+		scores['n']=@vertical.topnumber
+		scores['n'] = scores['n'] * 2 if !@vertical.topdomino.nil? && @vertical.topdomino.double?
+		scores['s']=@vertical.bottomnumber
+		scores['s'] = scores['s'] * 2 if !@vertical.bottomdomino.nil? && @vertical.bottomdomino.double?
+		scores['e']=@horizontal.topnumber
+		scores['e'] = scores['e'] * 2 if !@horizontal.topdomino.nil? && @horizontal.topdomino.double?
+		scores['w']=@horizontal.bottomnumber
+		scores['w'] = scores['w'] * 2 if !@horizontal.bottomdomino.nil? && @horizontal.bottomdomino.double?
+		scores.delete_if { |k,v| v.nil? }
+
+		if @vertical.topdomino == @spinner
+			scores.delete('n') if @horizontal.closed?(@spinner)
+		end
+		if @vertical.bottomdomino == @spinner
+			scores.delete('s') if @horizontal.closed?(@spinner)
+		end
+		if @horizontal.topdomino == @spinner
+			scores.delete('e') if @vertical.closed?(@spinner)
+		end
+		if @horizontal.bottomdomino == @spinner
+			scores.delete('w') if @vertical.closed?(@spinner)
+		end
+
+		if @vertical.topdomino == @vertical.bottomdomino
+			scores.delete('n')
+			scores.delete('s')
+		end
+		if @horizontal.topdomino == @horizontal.bottomdomino
+			scores.delete('w')
+			scores.delete('e')
+		end
+
+		scores.values.inject(0, :+)
+		
 	end
 
 end

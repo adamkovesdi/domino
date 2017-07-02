@@ -18,7 +18,7 @@ class DominoGame
 		names = %w(Curtis Tom Delia Stuart Ross Gabe Juan Damir Marco Lily Judit Paul John George Michael Samantha Betty Dorothy Monica)
 		@player1 = Randomplayer.new(names.sample)
 		@player2 = Randomplayer.new(names.sample)
-		# @player2 = Humanplayer.new(names.sample)
+		#@player2 = Humanplayer.new(names.sample)
 		@hand1 = Hand.new
 		@hand2 = Hand.new
 		7.times do
@@ -39,6 +39,8 @@ class DominoGame
 				end
 				hand.delete(domino)
 				puts "#{player.name} played #{domino} in #{place.upcase}"
+				# debug
+				puts "Score: #{@table.getscore}"
 				return 'win' if hand.empty?
 				return 'play'
 			end
