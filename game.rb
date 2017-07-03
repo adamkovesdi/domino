@@ -5,18 +5,19 @@ require_relative 'randomplayer'
 require_relative 'humanplayer'
 
 class DominoGame
-	attr_reader :table
-	attr_reader :boneyard
-	attr_reader :players
-	attr_reader :hands
+	attr_reader :winner
 
-	def initialize
+	def initialize(playercount = 2)
+		abort("*** Invalid player count #{playercount} [2-4]") if playercount > 4 || playercount < 2
+		@winner = nil
+		@passcount = 0
+		@playercount = playercount
 		@table = Table.new
 		@boneyard = Boneyard.new
 		@players = Array.new
 		@hands = Array.new
 		names = %w(Curtis Tom Delia Stuart Ross Gabe Juan Damir Marco Lily Judit Paul John George Michael Samantha Betty Dorothy Monica)
-		3.times do
+		@playercount.times do
 			@players << Randomplayer.new(names.sample)
 			@hands << Hand.new
 		end
@@ -60,22 +61,44 @@ class DominoGame
 		end
 	end	
 
-end
-
-g = DominoGame.new
-
-loop do
-	res = g.turn(g.players[0], g.hands[0])
-	if res == 'pass' || res == 'win'
-		puts "#{g.players[0].name} #{res}"
-		break
+	def summary
+		puts '--------'
+		@players.each_with_index do |p,i|
+			print p.name + ' ' ; @hands[i].display
+		end
+		@table.display
+		if winner.nil?
+			puts "No one win, blocked game"
+		else
+			puts "The winner is #{winner.name}"
+		end
 	end
-	g.nextturn
+
+	def run
+		res = turn(@players[0], @hands[0])
+		case res
+		when 'pass'
+			@passcount += 1
+			if @passcount < @playercount
+				nextturn
+				return true
+			else
+				# blocked game
+				puts "Blocked game!"
+				return false
+			end
+		when 'win'
+			puts "#{@players[0].name} #{res}"
+			@winner = @players[0]
+			return false
+		when 'play'
+			@passcount = 0
+			nextturn
+			return true
+		end
+	end
+
 end
 
-puts '--------'
-g.players.each_with_index do |p,i|
-	print p.name + ' ' ; g.hands[i].display
-end
-g.table.display
+g = DominoGame.new(3) ; while g.run ; end ; g.summary
 
