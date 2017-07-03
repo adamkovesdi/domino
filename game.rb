@@ -7,24 +7,29 @@ require_relative 'humanplayer'
 class DominoGame
 	attr_reader :table
 	attr_reader :boneyard
-	attr_reader :player1
-	attr_reader :player2
-	attr_reader :hand1
-	attr_reader :hand2
+	attr_reader :players
+	attr_reader :hands
 
 	def initialize
 		@table = Table.new
 		@boneyard = Boneyard.new
+		@players = Array.new
+		@hands = Array.new
 		names = %w(Curtis Tom Delia Stuart Ross Gabe Juan Damir Marco Lily Judit Paul John George Michael Samantha Betty Dorothy Monica)
-		@player1 = Randomplayer.new(names.sample)
-		@player2 = Randomplayer.new(names.sample)
-		#@player2 = Humanplayer.new(names.sample)
-		@hand1 = Hand.new
-		@hand2 = Hand.new
-		7.times do
-			@hand1.add(@boneyard.pull)
-			@hand2.add(@boneyard.pull)
+		3.times do
+			@players << Randomplayer.new(names.sample)
+			@hands << Hand.new
 		end
+		7.times do
+			@hands.each do |h|
+				h.add(@boneyard.pull)
+			end
+		end
+	end
+
+	def nextturn
+		@players.rotate!
+		@hands.rotate!
 	end
 
 	def turn(player, hand)
@@ -60,20 +65,17 @@ end
 g = DominoGame.new
 
 loop do
-	res = g.turn(g.player1, g.hand1)
+	res = g.turn(g.players[0], g.hands[0])
 	if res == 'pass' || res == 'win'
-		puts "#{g.player1.name} #{res}"
+		puts "#{g.players[0].name} #{res}"
 		break
 	end
-	res = g.turn(g.player2, g.hand2)
-	if res == 'pass' || res == 'win'
-		puts "#{g.player2.name} #{res}"
-		break
-	end
+	g.nextturn
 end
 
 puts '--------'
-print g.player1.name + ' ' ; g.hand1.display
+g.players.each_with_index do |p,i|
+	print p.name + ' ' ; g.hands[i].display
+end
 g.table.display
-print g.player2.name + ' ' ; g.hand2.display
 
