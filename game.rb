@@ -16,10 +16,12 @@ class DominoGame
 		@boneyard = Boneyard.new
 		@players = Array.new
 		@hands = Array.new
+		@scores = Array.new
 		names = %w(Curtis Tom Delia Stuart Ross Gabe Juan Damir Marco Lily Judit Paul John George Michael Samantha Betty Dorothy Monica)
 		@playercount.times do
 			@players << Randomplayer.new(names.sample)
 			@hands << Hand.new
+			@scores << 0
 		end
 		7.times do
 			@hands.each do |h|
@@ -31,11 +33,11 @@ class DominoGame
 	def nextturn
 		@players.rotate!
 		@hands.rotate!
+		@scores.rotate!
 	end
 
 	def turn(player, hand)
 		# return value = play, pass, win
-		# puts "#{player.name}'s turn"
 		while true
 			if @table.canplay?(hand)
 				place, domino = player.act(@table, hand)
@@ -44,9 +46,7 @@ class DominoGame
 					abort("*** Fault detected #{player.name} playing #{domino} to #{place.upcase} Invalid move.")
 				end
 				hand.delete(domino)
-				puts "#{player.name} played #{domino} in #{place.upcase}"
-				# debug
-				puts "Score: #{@table.getscore}"
+				puts "#{player.name} played #{domino} in #{place.upcase} Score: #{@table.getscore}"
 				return 'win' if hand.empty?
 				return 'play'
 			end
@@ -62,15 +62,20 @@ class DominoGame
 	end	
 
 	def summary
-		puts '--------'
+		puts '---Hands---'
 		@players.each_with_index do |p,i|
 			print p.name + ' ' ; @hands[i].display
 		end
+		puts '---Table---'
 		@table.display
 		if winner.nil?
 			puts "No one win, blocked game"
 		else
 			puts "The winner is #{winner.name}"
+		end
+		puts '---Scoring---'
+		@players.each_with_index do |p,i|
+			puts "#{p.name} #{@scores[i]}"
 		end
 	end
 
@@ -93,6 +98,7 @@ class DominoGame
 			return false
 		when 'play'
 			@passcount = 0
+			@scores[0] += @table.getscore
 			nextturn
 			return true
 		end
