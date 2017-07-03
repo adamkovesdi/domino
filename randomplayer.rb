@@ -47,6 +47,7 @@ class Randomplayer
 			# play a random move
 			place = validmoves[domino].sample
 		end
+		# puts "aiming for score #{table.calculatescoreforstep(domino,place)}"
 		return place, domino
 	end
 end

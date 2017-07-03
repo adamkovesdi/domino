@@ -257,20 +257,22 @@ class Table
 			else
 				return true if @horizontal.legaltail?(domino)
 			end
+		else
+			return false
 		end
-		return false
 	end
 
-	def play(domino, quarter)
-		case quarter
+	def play(domino, dir)
+		return false unless legalmove?(domino,dir)
+		case dir
 		when 'n'
-				ret = @vertical.addhead(domino) if legalmove?(domino,quarter)
+				ret = @vertical.addhead(domino)
 		when 's'
-				ret = @vertical.addtail(domino) if legalmove?(domino,quarter)
+				ret = @vertical.addtail(domino)
 		when 'e'
-				ret = @horizontal.addhead(domino) if legalmove?(domino,quarter)
+				ret = @horizontal.addhead(domino)
 		when 'w'
-				ret = @horizontal.addtail(domino) if legalmove?(domino,quarter)
+				ret = @horizontal.addtail(domino)
 		else
 			return false
 		end
@@ -294,6 +296,31 @@ class Table
 		end
 		return false
 	end
+
+
+	def calculatescoreforstep(domino,dir)
+		# returns value of board with the domino
+		return false unless legalmove?(domino,dir)
+		case dir
+		when 'n'
+				@vertical.addhead(domino)
+		when 's'
+				@vertical.addtail(domino)
+		when 'e'
+				@horizontal.addhead(domino)
+		when 'w'
+				@horizontal.addtail(domino)
+		else
+			# should not happen
+			return false
+		end
+		retval = getscore
+		retval = 0 unless retval % 5 == 0
+		@horizontal.delete(domino)
+		@vertical.delete(domino)
+		return retval
+	end
+
 
 	def getscore
 		# returns the score of the whole board
@@ -330,7 +357,9 @@ class Table
 			scores.delete('e')
 		end
 
-		scores.values.inject(0, :+)
+		score = scores.values.inject(0, :+)
+		score = 0 unless score % 5 == 0
+		score
 		
 	end
 

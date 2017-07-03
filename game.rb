@@ -74,7 +74,7 @@ class DominoGame
 		end
 	end
 
-	def run
+	def round
 		res = turn(@players[0], @hands[0])
 		case res
 		when 'pass'
@@ -100,5 +100,5 @@ class DominoGame
 
 end
 
-g = DominoGame.new(3) ; while g.run ; end ; g.summary
+g = DominoGame.new(4) ; while g.round ; end ; g.summary
 
