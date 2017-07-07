@@ -3,12 +3,14 @@
 require_relative 'domino'
 require_relative 'randomplayer'
 require_relative 'humanplayer'
+require_relative 'greedyplayer'
 
 class DominoGame
 	attr_reader :winner
 
 	def initialize(playercount = 2)
-		abort("*** Invalid player count #{playercount} [2-4]") if playercount > 4
+		abort("*** Invalid player count #{playercount} [2-4]") if playercount > 4 || playercount < 2
+		players = %w(r r g r)
 		@winner = nil
 		@passcount = 0
 		@playercount = playercount
@@ -17,19 +19,17 @@ class DominoGame
 		@players = Array.new
 		@hands = Array.new
 		@scores = Array.new
-		if @playercount == 1
-			@players << Randomplayer.new('machine')
-			@hands << Hand.new
-			@scores << 0
-			@players << Humanplayer.new('human')
-			@hands << Hand.new
-			@scores << 0
-		else
 		@playercount.times do
-			@players << Randomplayer.new
+			case players.shift
+			when 'g'
+				@players << Greedyplayer.new
+			when 'h'
+				@players << Humanplayer.new
+			else
+				@players << Randomplayer.new
+			end
 			@hands << Hand.new
 			@scores << 0
-		end
 		end
 		7.times do
 			@hands.each do |h|
