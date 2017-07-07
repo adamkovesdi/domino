@@ -123,6 +123,12 @@ class Hand < DominoHolder
 		@dominos.each_with_index { |dom,i| print "#{i} [#{dom}] " }
 		puts
 	end
+
+	def value
+		value = 0
+		@dominos.each { |d| value += d.value }
+		value
+	end
 end
 
 class Stack < DominoHolder
