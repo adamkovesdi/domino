@@ -8,9 +8,10 @@ class DominoGame
 	attr_reader :winner
 
 	def initialize(playercount = 2)
-		abort("*** Invalid player count #{playercount} [2-4]") if playercount > 4 || playercount < 2
+		abort("*** Invalid player count #{playercount} [2-4]") if playercount > 4
 		@winner = nil
 		@passcount = 0
+		@faultcount = 0
 		@playercount = playercount
 		@table = Table.new
 		@boneyard = Boneyard.new
@@ -18,10 +19,19 @@ class DominoGame
 		@hands = Array.new
 		@scores = Array.new
 		names = %w(Curtis Tom Delia Stuart Ross Gabe Juan Damir Marco Lily Judit Paul John George Michael Samantha Betty Dorothy Monica)
+		if @playercount == 1
+			@players << Randomplayer.new(names.sample)
+			@hands << Hand.new
+			@scores << 0
+			@players << Humanplayer.new('human')
+			@hands << Hand.new
+			@scores << 0
+		else
 		@playercount.times do
 			@players << Randomplayer.new(names.sample)
 			@hands << Hand.new
 			@scores << 0
+		end
 		end
 		7.times do
 			@hands.each do |h|
@@ -43,7 +53,10 @@ class DominoGame
 				place, domino = player.act(@table, hand)
 				ret = @table.play(domino,place)
 				unless ret
-					abort("*** Fault detected #{player.name} playing #{domino} to #{place.upcase} Invalid move.")
+					puts("Fault detected #{player.name} playing #{domino} to #{place.upcase} Invalid move.")
+					@faultcount += 1
+					abort("*** Too many failures. Safety trigger pulled. Exiting") if @faultcount > 30
+					next
 				end
 				hand.delete(domino)
 				puts "#{player.name} played #{domino} in #{place.upcase} Score: #{@table.getscore}"
@@ -51,7 +64,7 @@ class DominoGame
 				return 'play'
 			end
 			if @boneyard.empty?
-				puts "#{player.name} could not play - no dominos left"
+				puts "#{player.name} passed"
 				return 'pass'
 			else
 				dom = @boneyard.pull
@@ -93,7 +106,7 @@ class DominoGame
 				return false
 			end
 		when 'win'
-			puts "#{@players[0].name} #{res}"
+			puts "#{@players[0].name} dominoed"
 			@winner = @players[0]
 			return false
 		when 'play'
@@ -106,5 +119,6 @@ class DominoGame
 
 end
 
+srand ARGV[0].to_i unless ARGV.nil? 
 g = DominoGame.new(4) ; while g.round ; end ; g.summary
 
