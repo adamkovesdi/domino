@@ -21,7 +21,7 @@ class Humanplayer
 
 		loop do
 			print '> '
-			input = gets.strip.downcase
+			input = $stdin.gets.strip.downcase
 			if input[0] == 'q'
 				puts 'Quit.'
 				exit 0
@@ -31,6 +31,10 @@ class Humanplayer
 			next unless ['n','e','w','s'].include?(place)
 			domino = hand.get(d.to_i)
 			next if domino.nil?
+			unless table.legalmove?(domino, place)
+				puts "Invalid move: #{domino} to #{place.upcase}"
+				next
+			end
 			return place, domino
 		end
 	end

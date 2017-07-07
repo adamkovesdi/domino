@@ -7,7 +7,9 @@ require_relative 'domino'
 class Randomplayer
 	attr_reader :name
 
-	def initialize(name = 'noname')
+	def initialize(name = nil)
+		names = %w(Curtis Tom Delia Stuart Ross Gabe Juan Damir Marco Lily Judit Paul John George Michael Samantha Betty Dorothy Monica)
+		name ||= names.sample
 		@name = name
 	end
 

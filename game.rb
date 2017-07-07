@@ -11,16 +11,14 @@ class DominoGame
 		abort("*** Invalid player count #{playercount} [2-4]") if playercount > 4
 		@winner = nil
 		@passcount = 0
-		@faultcount = 0
 		@playercount = playercount
 		@table = Table.new
 		@boneyard = Boneyard.new
 		@players = Array.new
 		@hands = Array.new
 		@scores = Array.new
-		names = %w(Curtis Tom Delia Stuart Ross Gabe Juan Damir Marco Lily Judit Paul John George Michael Samantha Betty Dorothy Monica)
 		if @playercount == 1
-			@players << Randomplayer.new(names.sample)
+			@players << Randomplayer.new('machine')
 			@hands << Hand.new
 			@scores << 0
 			@players << Humanplayer.new('human')
@@ -28,7 +26,7 @@ class DominoGame
 			@scores << 0
 		else
 		@playercount.times do
-			@players << Randomplayer.new(names.sample)
+			@players << Randomplayer.new
 			@hands << Hand.new
 			@scores << 0
 		end
@@ -53,10 +51,7 @@ class DominoGame
 				place, domino = player.act(@table, hand)
 				ret = @table.play(domino,place)
 				unless ret
-					puts("Fault detected #{player.name} playing #{domino} to #{place.upcase} Invalid move.")
-					@faultcount += 1
-					abort("*** Too many failures. Safety trigger pulled. Exiting") if @faultcount > 30
-					next
+					abort("*** Fault detected #{player.name} playing #{domino} to #{place.upcase} Invalid move.")
 				end
 				hand.delete(domino)
 				puts "#{player.name} played #{domino} in #{place.upcase} Score: #{@table.getscore}"
