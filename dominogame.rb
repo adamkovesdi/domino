@@ -42,7 +42,7 @@ class Dominogame
 			when 'g'
 				player.ai = Greedyplayer.new
 			when 'h'
-				player.ai = Humanplayer.new
+				player.ai = Humanplayer.new('human')
 			else
 				player.ai = Randomplayer.new
 			end
@@ -63,6 +63,7 @@ class Dominogame
 		@table = Table.new
 		@boneyard = Boneyard.new
 		@winner = nil
+		@players.each { |p| p.hand = Hand.new }
 	end
 
 	def dealhands
@@ -75,6 +76,12 @@ class Dominogame
 		@players.rotate!
 	end
 
+	def lightesthandplayer
+		minh = @players.min_by { |a| a.hand.value }
+		puts "Lightest hand: #{minh.name} #{minh.hand.value}"
+		return minh
+	end
+
 	def scorehands
 		unless @winner.nil?
 			# winner gets points for all other's hands
@@ -84,7 +91,14 @@ class Dominogame
 			# TODO: round to nearest five
 		else
 			# block: lightest hand gets all other hand's points - own hand's points 
-			# TODO: alltogether
+			light = lightesthandplayer
+			roundscore = 0
+			@players.reject{|p| p ==light}.each {|ene| roundscore += ene.hand.value}
+			roundscore -= light.hand.value
+			light.score += roundscore
+			# TODO: round to nearest five
+			@players.shuffle!
+			@winner = nil
 		end
 	end
 
@@ -145,15 +159,21 @@ class Dominogame
 
 	def match(scorelimit = 150)
 		# until player reaches 150 score (scorelimit)
-		resettableboneyard
-		dealhands
-		round
-		scorehands
+		while @players.max{|a,b| a.score <=> b.score}.score < scorelimit
+			resettableboneyard
+			dealhands
+			round
+			scorehands
+			summary
+		end
 	end
 
-	def game
+	def game(players = 2)
 		# whole unit
-		# TODO: implement
+		initplayers(players)
+		match
+		puts "===================="
+		puts "Overall winner is: #{@players.max_by{|p| p.score}.name}"
 	end
 
 	def summary
@@ -177,6 +197,4 @@ end
 
 srand ARGV[0].to_i unless ARGV[0].nil? 
 dg = Dominogame.new
-dg.initplayers(3)
-dg.match
-dg.summary
+dg.game
